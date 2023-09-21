@@ -1,0 +1,6 @@
+# ignore
+.vscode/
+data/
+output/
+*.pyc
+pth/
