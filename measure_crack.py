@@ -43,13 +43,13 @@ def max_circle(img, img_original, img_result):
     #     cv2.CHAIN_APPROX_SIMPLE压缩水平方向，垂直方向，对角线方向的元素，只保留该方向的终点坐标，例如一个矩形轮廓只需4个点来保存轮廓信息
     #     cv2.CHAIN_APPROX_TC89_L1，CV_CHAIN_APPROX_TC89_KCOS使用teh-Chinl chain 近似算法
     #----------------------------------------------------------#
-    contous, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     # 所有裂缝最大内切圆半径和圆心列表
     expansion_circle_list = []
     
     # 可能一张图片中存在多条裂缝，对每一条裂缝进行循环计算
-    for c in contous:
+    for c in contours:
         
         # 定义能包含此裂缝的最小矩形，矩形为水平方向
         left_x = min(c[:, 0, 0])
@@ -123,7 +123,7 @@ def max_circle(img, img_original, img_result):
         max_center = expansion_circle_list[expansion_circle_radius_list.index(max_radius)][1]
         print('最大宽度：', round(max_radius * 2, 2))
         # 绘制轮廓
-        cv2.drawContours(img_original, contous, -1, (0, 0, 255), -1)
+        cv2.drawContours(img_original, contours, -1, (0, 0, 255), -1)
         # 绘制裂缝轮廓最大内切圆
         for expansion_circle in expansion_circle_list:
             radius_s = expansion_circle[0]
@@ -142,12 +142,12 @@ def max_circle(img, img_original, img_result):
     cv2.imwrite(img_result, img_original)
 
 
-def iterated_optimal_incircle_radius_get(contous, pixelx, pixely, small_r, big_r, precision):
+def iterated_optimal_incircle_radius_get(contours, pixelx, pixely, small_r, big_r, precision):
     '''
     计算轮廓内最大内切圆的半径
     
     Args:
-        contous: 轮廓像素点array数组
+        contours: 轮廓像素点array数组
         pixelx: 圆心x像素坐标
         pixely: 圆心y像素坐标
         small_r: 之前所有计算所求得的内切圆的最大半径，作为下次计算时的最小半径输入，只有半径变大时才允许位置变更，否则保持之前位置不变
@@ -163,7 +163,7 @@ def iterated_optimal_incircle_radius_get(contous, pixelx, pixely, small_r, big_r
     circle_Y = pixely + radius * sin(L)
     for i in range(len(circle_Y)):
         # 如果圆散集有在轮廓之外的点
-        if cv2.pointPolygonTest(contous, (circle_X[i], circle_Y[i]), False) < 0:  
+        if cv2.pointPolygonTest(contours, (circle_X[i], circle_Y[i]), False) < 0:  
             return 0
     while big_r - small_r >= precision:  # 二分法寻找最大半径
         half_r = (small_r + big_r) / 2
@@ -172,7 +172,7 @@ def iterated_optimal_incircle_radius_get(contous, pixelx, pixely, small_r, big_r
         if_out = False
         for i in range(len(circle_Y)):
             # 如果圆散集有在轮廓之外的点
-            if cv2.pointPolygonTest(contous, (circle_X[i], circle_Y[i]), False) < 0:
+            if cv2.pointPolygonTest(contours, (circle_X[i], circle_Y[i]), False) < 0:
                 big_r = half_r
                 if_out = True
         if not if_out:
@@ -183,11 +183,11 @@ def iterated_optimal_incircle_radius_get(contous, pixelx, pixely, small_r, big_r
 
 if __name__ == '__main__':
     # 灰度图
-    img_gray = 'data/measure_data/measure_test_block.jpg'
+    img_gray = 'data/measure_data/8-0_3mm/measure_test_block_5_8 - 0.3mm - HK-HJD-S-01_181210_K2056+066.36_T2672.36_0749-01-00_VL-Y.jpg'
     # 原图
-    img_original = 'data/measure_data/measure_test_block_original.jpg'
+    img_original = 'data/measure_data/8-0_3mm/measure_test_block_original_5_8 - 0.3mm - HK-HJD-S-01_181210_K2056+066.36_T2672.36_0749-01-00_VL-Y.jpg'
     # 结果路径
-    img_result = 'output/result_measure_test_block.jpg'
+    img_result = 'output/measure/result_measure_test_block_measure_test_block_original_5_8 - 0.3mm - HK-HJD-S-01_181210_K2056+066.36_T2672.36_0749-01-00_VL-Y.jpg'
     
     max_circle(img_gray, img_original, img_result) 
 
