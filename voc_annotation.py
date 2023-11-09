@@ -3,7 +3,7 @@ FilePath: /crack-0921/voc_annotation.py
 Description:  
 Author: rthete
 Date: 2023-11-08 21:18:02
-LastEditTime: 2023-11-08 21:30:16
+LastEditTime: 2023-11-09 21:25:14
 """
 import os
 import random
@@ -29,10 +29,8 @@ VOCdevkit_path      = 'VOCdevkit'
 if __name__ == "__main__":
     random.seed(0)
     print("Generate txt in ImageSets.")
-    # segfilepath     = os.path.join(VOCdevkit_path, 'VOC2007/SegmentationClass')
-    # saveBasePath    = os.path.join(VOCdevkit_path, 'VOC2007/ImageSets/Segmentation')
-    segfilepath     = "D://projects//project-0624//项目组//231028-758-all//HJD-VOC//SegmentationClassPNG"
-    saveBasePath    = "D://projects//project-0624//项目组//231028-758-all//HJD-VOC//ImageSets//Segmentation"
+    segfilepath     = os.path.join(VOCdevkit_path, 'SegmentationClassPNG')
+    saveBasePath    = os.path.join(VOCdevkit_path, 'ImageSets/Segmentation')
     
     temp_seg = os.listdir(segfilepath)
     total_seg = []
