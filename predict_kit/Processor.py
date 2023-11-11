@@ -1,14 +1,15 @@
 import copy
 import cv2
 import numpy as np
+import string
 from PIL import Image
 
 from unet import Unet
 from utils.utils import cvtColor
 from unet2 import Unet2
-from predict_kit.MaxCircle import MaxCircle
 
-class Processor():
+
+class Processor:
     @staticmethod
     def segment_UNet(original_block):
         """Stage 1. Use pretrained UNet model to predict crack areas."""
@@ -118,14 +119,42 @@ class Processor():
         # 将分割模型的结果与边缘检测结果相与
         result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=label_img)
         cv2.imwrite("predict_test/result_img.jpg", result_img)
-        
+
         return result_img
 
     @staticmethod
     def measure_incircle(original_img, calibrated_img):
         """Stage 3. Incircle algorithm to measure segmented crack areas' width."""
-        result_img = MaxCircle.max_circle(original_img, calibrated_img)
-        return result_img
+        original_img = np.array(original_img)
+        contours_arr, _ = cv2.findContours(
+            calibrated_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE
+        )
+
+        # result：一个与输入图像相同大小的BGR图像，用于绘制测量结果。
+        # raw_dist：一个与输入图像相同大小的浮点数数组，用于存储点到轮廓的距离。
+        # letters：一个包含大写字母的列表，用于给测量的裂缝区域标签。
+        # label：一个字典，用于存储每个裂缝区域的宽度测量结果。
+        result = cv2.cvtColor(calibrated_img, cv2.COLOR_GRAY2BGR)
+        raw_dist = np.zeros(calibrated_img.shape, dtype=np.float32)
+        letters = list(string.ascii_uppercase)
+        label = {}
+
+        # 遍历每个轮廓并测量宽度
+        for k, contours in enumerate(contours_arr):
+            for i in range(calibrated_img.shape[0]):
+                for j in range(calibrated_img.shape[1]):
+                    # 使用cv2.pointPolygonTest计算点到轮廓的距离
+                    raw_dist[i, j] = cv2.pointPolygonTest(contours, (j, i), True)
+            # 找到最大距离的点和对应的距离
+            min_val, max_val, _, max_dist_pt = cv2.minMaxLoc(raw_dist)
+            # 将裂缝宽度的两倍存储到label字典中
+            label[letters[k]] = max_val * 2
+            radius = int(max_val)
+            # 在结果图像上绘制测量结果
+            cv2.circle(original_img, max_dist_pt, radius, (0, 0, 255), 1, 1, 0)
+        print("裂缝宽度：", label)
+
+        return original_img
 
 
 def process_block():
