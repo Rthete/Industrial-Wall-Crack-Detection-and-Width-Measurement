@@ -4,3 +4,4 @@ data/
 output/
 *.pyc
 pth/
+*.jpg
