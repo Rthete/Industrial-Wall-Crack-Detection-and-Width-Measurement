@@ -20,7 +20,7 @@ colors = [(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128,
           (128, 64, 12)]
 
 
-def process_block(block):
+def process_block(block, file, index):
     pr_resnet50 = resnet50_unet.get_pr(block, count=count, name_classes=name_classes)
     pr_vgg = vgg_unet.get_pr(block, count=count, name_classes=name_classes)
     
@@ -58,9 +58,8 @@ def process_block(block):
         
         # 保存一张block二值图以供宽度测量实验
         if measure_flag is True:
-            image.save("output/measure_test_block.jpg")
-            old_img.save("output/measure_test_block_original.jpg")
-            exit()
+            image.save("data/measure_data/measure_test_block_{}_{}".format(index, file))
+            old_img.save("data/measure_data/measure_test_block_original_{}_{}".format(index, file))
         
         # 将Image对象转换为NumPy数组
         old_img_array = np.array(old_img)
@@ -136,8 +135,12 @@ if __name__ == "__main__":
     
     # 获取待分割的图片
     folder_path = 'data/seg_data'
+    # folder_path = 'data/data_width'
+    
     if measure_flag == True:
-        folder_path = 'data/measure_data'
+        # folder_path = 'data/measure_data'
+        # folder_path = 'data/data_width'
+        pass
     
     files = get_files_in_folder(folder_path)
     
@@ -156,8 +159,10 @@ if __name__ == "__main__":
 
         # 对每个小块进行处理
         processed_blocks = []
+        index = 0
         for block in blocks:
-            processed_blocks.append(process_block(block))
+            index = index + 1
+            processed_blocks.append(process_block(block, file, index))
 
         # 将各个block拼接回大图，并保存
         processed_image = join_image(processed_blocks, original_image.width, original_image.height)
