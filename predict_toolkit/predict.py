@@ -7,9 +7,13 @@ LastEditTime: 2023-11-18 19:38:17
 """
 import cv2
 import os
-from PIL import Image
-from Processor import Processor
+from tqdm import tqdm
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from PIL import Image
+
+from Processor import Processor
+
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -19,12 +23,14 @@ def process_pipeline(original_block):
         return np.array(original_block)
     calibrated_block = Processor.calibrate(original_block, segmented_block)
     measured_block = Processor.measure_incircle(original_block, calibrated_block)
-    return measured_block
+    result_block = Processor.add_mask(measured_block, np.array(original_block))
+    return result_block
+    # return measured_block
 
 
 if __name__ == "__main__":
     # sample_path = "D:\projects\project-0624\crack-0921\data\data_backup"
-    sample_path = "D:\projects\project-0624\crack-0921\data\predict_toolkit_set"
+    sample_path = "/home/zxy/crack-segment-and-measure/data/predict_test"
     image_path_list = []
     for root, dirs, files in os.walk(sample_path):
         # print(files)
@@ -38,9 +44,17 @@ if __name__ == "__main__":
         blocks = Processor.split_image(image_path, 1024)
         processed_blocks = []
         index = 0
-        for block in blocks:
+        for block in tqdm(blocks, desc="Processing Blocks", unit="block"):
             index = index + 1
             processed_blocks.append(process_pipeline(block))
+        
+        # # 定义线程池
+        # with ThreadPoolExecutor() as executor:
+        #     # 提交任务并获得 Future 对象的列表
+        #     futures = [executor.submit(process_pipeline, block) for block in blocks]
+
+        #     # 等待所有任务完成
+        #     processed_blocks = [future.result() for future in futures]
             
         processed_image = Processor.join_image(processed_blocks, original_image.width, original_image.height)
         processed_image.save('result_{}'.format(os.path.basename(image_path)))

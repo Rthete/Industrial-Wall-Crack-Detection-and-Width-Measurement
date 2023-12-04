@@ -1,5 +1,6 @@
 import copy
 import cv2
+from datetime import datetime
 import numpy as np
 import string
 import sys
@@ -12,7 +13,10 @@ from unet import Unet
 from unet2 import Unet2
 from utils.utils import cvtColor
 
-logging.basicConfig(level=logging.DEBUG,
+current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+
+logging.basicConfig(filename=f'log_{current_time}.log',
+                    level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 class Processor:
@@ -107,9 +111,45 @@ class Processor:
         try:
             original_img = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY)
         except Exception as e:
-            logging.error(f"clibrate: {e}")
+            pass
+            # logging.error(f"clibrate: {e}")
         cv2.imwrite("predict_test/original_img.jpg", original_img)
+        
+        # # GPU加速
+        # # 将原始图像上传到 GPU
+        # original_img_gpu = cv2.cuda_GpuMat()
+        # original_img_gpu.upload(original_img)
 
+        # # 调整亮度
+        # original_img_gpu = cv2.cuda.cvtColor(original_img_gpu, cv2.COLOR_BGR2GRAY)
+        # original_img_gpu = cv2.cuda.addWeighted(original_img_gpu, 0.4, 0, 0, 50)
+
+        # # 反转图像
+        # original_img_gpu = cv2.cuda.bitwise_not(original_img_gpu)
+
+        # # 边缘检测
+        # edges_gpu = cv2.cuda.createCannyEdgeDetector(50, 100).detect(original_img_gpu)
+
+        # # 定义卷积核
+        # kernel = np.ones((5, 5), np.uint8)
+
+        # # 闭运算
+        # closed_edges_gpu = cv2.cuda.createMorphologyFilter(cv2.MORPH_CLOSE, edges_gpu.type(), kernel).apply(edges_gpu)
+
+        # # 转换标签图像为灰度
+        # label_img_gpu = cv2.cuda_GpuMat()
+        # label_img_gpu.upload(label_img)
+        # label_img_gpu = cv2.cuda.cvtColor(label_img_gpu, cv2.COLOR_BGR2GRAY)
+        # label_img_gpu = cv2.cuda.threshold(label_img_gpu, 0, 255, cv2.THRESH_BINARY)[1]
+
+        # # 按位与运算
+        # result_img_gpu = cv2.cuda.bitwise_and(closed_edges_gpu, closed_edges_gpu, mask=label_img_gpu)
+
+        # # 从 GPU 下载结果图像
+        # result_img = result_img_gpu.download()
+        
+        #----------------------------------
+        
         # 调整对比度
         original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
         original_img = cv2.bitwise_not(original_img)
@@ -132,7 +172,17 @@ class Processor:
         # 将分割模型的结果与边缘检测结果相与
         result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=label_img)
         cv2.imwrite("predict_test/result_img.jpg", result_img)
-
+        
+        
+        # # 调整对比度
+        # original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
+        # original_img = cv2.bitwise_not(original_img)
+        # edges = cv2.Canny(original_img, 50, 100)
+        # kernel = np.ones((5, 5), np.uint8)
+        # closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        # label_img = cv2.cvtColor(label_img, cv2.COLOR_RGB2GRAY)
+        # label_img = np.uint8(label_img > 0)
+        # result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=label_img)
         return result_img
 
     @staticmethod
@@ -167,9 +217,37 @@ class Processor:
             radius = int(max_val)
             # 在结果图像上绘制测量结果
             cv2.circle(original_img, max_dist_pt, radius, (0, 0, 255), 1, 1, 0)
+            cv2.putText(original_img, f"{label[-1]:.2f}", (max_dist_pt[0] + radius + 5, max_dist_pt[1]),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
         logging.info(f"裂缝宽度：{label}")
 
         return original_img
+    
+    @staticmethod
+    def add_mask(image_array, old_img_array):
+        # 创建掩膜，将image中RGB为(0,0,0)的像素位置置为True
+        # mask = np.all(image_array == [128, 0, 0], axis=-1)
+
+        # # 混合系数
+        # alpha = 0.7
+
+        # # 使用NumPy数组进行混合
+        # mixed_pixels = (1 - alpha) * old_img_array[mask] + alpha * image_array[mask]
+
+        # # 更新混合后的像素到old_img对应的位置
+        # old_img_array[mask] = mixed_pixels
+
+        # # 将NumPy数组转换为Image对象
+        # image = Image.fromarray(old_img_array)
+        # image = Image.fromarray(image_array)
+
+        # 增加阴影效果
+        # 创建与 image 相同大小的透明黑色图层
+        # blend_factor = 0.5
+        # image = Image.blend(image, image, blend_factor)
+        intensity = 0.5
+        shadow_image = image_array * (1 - intensity)
+        return shadow_image
 
 
     @staticmethod

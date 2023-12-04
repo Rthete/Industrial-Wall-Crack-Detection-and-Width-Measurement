@@ -26,7 +26,7 @@ class Unet2(object):
         #   训练好后logs文件夹下存在多个权值文件，选择验证集损失较低的即可。
         #   验证集损失较低不代表miou较高，仅代表该权值在验证集上泛化性能较好。
         #-------------------------------------------------------------------#
-        "model_path"    : 'pth/vgg_unet_best_epoch_weights.pth',
+        "model_path"    : '../pth/vgg_unet_best_epoch_weights.pth',
         #--------------------------------#
         #   所需要区分的类的个数+1
         #--------------------------------#
@@ -51,8 +51,8 @@ class Unet2(object):
         #   是否使用Cuda
         #   没有GPU可以设置成False
         #--------------------------------#
-        "cuda"          : False,
-        # "cuda"          : True,
+        # "cuda"          : False,
+        "cuda"          : True,
     }
 
     #---------------------------------------------------#
@@ -79,7 +79,7 @@ class Unet2(object):
         #---------------------------------------------------#
         self.generate()
         
-        show_config(**self._defaults)
+        # show_config(**self._defaults)
 
     #---------------------------------------------------#
     #   获得所有的分类
@@ -87,16 +87,16 @@ class Unet2(object):
     def generate(self, onnx=False):
         self.net = unet(num_classes = self.num_classes, backbone=self.backbone)
 
-        device      = torch.device('cpu')
-        # device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # device      = torch.device('cpu')
+        device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net.load_state_dict(torch.load(self.model_path, map_location=device))
         self.net    = self.net.eval()
-        print('{} model, and classes loaded.'.format(self.model_path))
+        # print('{} model, and classes loaded.'.format(self.model_path))
         if not onnx:
             if self.cuda:
                 self.net = nn.DataParallel(self.net)
-                self.net = self.net.cpu()
-                # self.net = self.net.cuda()
+                # self.net = self.net.cpu()
+                self.net = self.net.cuda()
     
     def get_pr(self, image, count=False, name_classes=None):
         image       = cvtColor(image)
