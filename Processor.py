@@ -10,14 +10,13 @@ from PIL import Image
 
 sys.path.append("..")
 
-from unet import Unet
-from unet2 import Unet2
-from utils.utils import cvtColor
+from model import Model
+from utils import cvtColor
 
 current_time = datetime.now().strftime("%Y%m%d%H%M%S")
 
 logging.basicConfig(
-    filename=f"log_{current_time}.log",
+    filename=f"logs/log_{current_time}.log",
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
@@ -29,8 +28,8 @@ class Processor:
         """Stage 1. Use pretrained UNet model to predict crack areas."""
 
         count = False
-        resnet50_unet = Unet(model_path='../pth/resnet50_unet_best_epoch_weights.pth', backbone="resnet50")
-        vgg_unet = Unet(model_path='../pth/vgg_unet_best_epoch_weights.pth', backbone="vgg")
+        resnet50_unet = Model(model_path='pth/resnet50_unet_best_epoch_weights.pth', backbone="resnet50")
+        vgg_unet = Model(model_path='pth/vgg_unet_best_epoch_weights.pth', backbone="vgg")
         name_classes = ["background", "crack"]
 
         pr_resnet50 = resnet50_unet.get_pr(
