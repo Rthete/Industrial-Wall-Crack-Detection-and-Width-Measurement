@@ -1,8 +1,6 @@
 # ignore
 .vscode/
-data/
-output/
-*.pyc
-pth/
-*.jpg
 *.log
+*.png
+*.pyc
+*.pth
