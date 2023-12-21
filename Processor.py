@@ -106,7 +106,7 @@ class Processor:
             original_img = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY)
         except Exception as e:
             pass
-            # logging.error(f"clibrate: {e}")
+            # logging.error(f"Exception in edge detection: {e}")
 
         original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
         original_img = cv2.bitwise_not(original_img)
