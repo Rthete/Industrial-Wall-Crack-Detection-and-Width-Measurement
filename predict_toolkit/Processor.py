@@ -115,41 +115,6 @@ class Processor:
             # logging.error(f"clibrate: {e}")
         cv2.imwrite("predict_test/original_img.jpg", original_img)
         
-        # # GPU加速
-        # # 将原始图像上传到 GPU
-        # original_img_gpu = cv2.cuda_GpuMat()
-        # original_img_gpu.upload(original_img)
-
-        # # 调整亮度
-        # original_img_gpu = cv2.cuda.cvtColor(original_img_gpu, cv2.COLOR_BGR2GRAY)
-        # original_img_gpu = cv2.cuda.addWeighted(original_img_gpu, 0.4, 0, 0, 50)
-
-        # # 反转图像
-        # original_img_gpu = cv2.cuda.bitwise_not(original_img_gpu)
-
-        # # 边缘检测
-        # edges_gpu = cv2.cuda.createCannyEdgeDetector(50, 100).detect(original_img_gpu)
-
-        # # 定义卷积核
-        # kernel = np.ones((5, 5), np.uint8)
-
-        # # 闭运算
-        # closed_edges_gpu = cv2.cuda.createMorphologyFilter(cv2.MORPH_CLOSE, edges_gpu.type(), kernel).apply(edges_gpu)
-
-        # # 转换标签图像为灰度
-        # label_img_gpu = cv2.cuda_GpuMat()
-        # label_img_gpu.upload(label_img)
-        # label_img_gpu = cv2.cuda.cvtColor(label_img_gpu, cv2.COLOR_BGR2GRAY)
-        # label_img_gpu = cv2.cuda.threshold(label_img_gpu, 0, 255, cv2.THRESH_BINARY)[1]
-
-        # # 按位与运算
-        # result_img_gpu = cv2.cuda.bitwise_and(closed_edges_gpu, closed_edges_gpu, mask=label_img_gpu)
-
-        # # 从 GPU 下载结果图像
-        # result_img = result_img_gpu.download()
-        
-        #----------------------------------
-        
         # 调整对比度
         original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
         original_img = cv2.bitwise_not(original_img)
@@ -173,16 +138,6 @@ class Processor:
         result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=label_img)
         cv2.imwrite("predict_test/result_img.jpg", result_img)
         
-        
-        # # 调整对比度
-        # original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
-        # original_img = cv2.bitwise_not(original_img)
-        # edges = cv2.Canny(original_img, 50, 100)
-        # kernel = np.ones((5, 5), np.uint8)
-        # closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-        # label_img = cv2.cvtColor(label_img, cv2.COLOR_RGB2GRAY)
-        # label_img = np.uint8(label_img > 0)
-        # result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=label_img)
         return result_img
 
     @staticmethod

@@ -30,7 +30,7 @@ def process_pipeline(original_block):
 
 if __name__ == "__main__":
     # sample_path = "D:\projects\project-0624\crack-0921\data\data_backup"
-    sample_path = "/home/zxy/crack-segment-and-measure/data/predict_test"
+    sample_path = "../data/predict_test"
     image_path_list = []
     for root, dirs, files in os.walk(sample_path):
         # print(files)
