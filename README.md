@@ -13,3 +13,7 @@ One sample using our methods are as follows:
 Before usage, place the pth weight file in the `pth` directory and place the images to be recognized in the `data` directory. Additionally, ensure the installation of the required dependencies.
 
 Run `predict.py` to execute the inference.
+
+## Reference
+
+https://github.com/bubbliiiing/unet-pytorch
