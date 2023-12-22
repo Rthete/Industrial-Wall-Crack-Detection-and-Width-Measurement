@@ -14,6 +14,8 @@ Before usage, place the pth weight file in the `pth` directory and place the ima
 
 Run `predict.py` to execute the inference.
 
+Check out predict information in `logs`.
+
 ## Reference
 
 https://github.com/bubbliiiing/unet-pytorch

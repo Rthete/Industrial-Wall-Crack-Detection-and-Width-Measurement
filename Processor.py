@@ -165,7 +165,7 @@ class Processor:
         mask = np.all(segmented_img_Image == [128, 0, 0], axis=-1)
 
         alpha = 0.7
-        mixed_pixels = (1 - alpha) * old_img_array[mask] + alpha * segmented_img_Image[mask]
+        mixed_pixels = (1 - alpha) * old_img_array[mask] + alpha * segmented_img_array[mask]
         old_img_array[mask] = mixed_pixels
         old_img_Image = Image.fromarray(old_img_array)
         
