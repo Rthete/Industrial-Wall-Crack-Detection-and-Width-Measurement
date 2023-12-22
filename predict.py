@@ -20,7 +20,6 @@ def process_pipeline(index, original_block):
     )
     result_block = Processor.add_mask(edge_detected_block, measured_block)
     return result_block
-    # return measured_block
 
 
 if __name__ == "__main__":
