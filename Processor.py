@@ -24,7 +24,7 @@ logging.basicConfig(
 
 class Processor:
     """The whole crack detection and measurement process."""
-    
+
     @staticmethod
     def segment_UNet(original_img):
         """Use pretrained UNet model to predict crack areas.
@@ -121,12 +121,12 @@ class Processor:
         Returns:
             result_img (nparray): The more precise crack regions obtained by combining edge detection.
         """
+        
         original_img = np.array(original_img)
-        try:
+        if len(original_img.shape) == 3:
             original_img = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY)
-        except Exception as e:
-            pass
-            # logging.error(f"Exception in edge detection: {e}")
+        if len(segmented_img.shape) == 3:
+            segmented_img = cv2.cvtColor(segmented_img, cv2.COLOR_RGB2GRAY)
 
         original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
         original_img = cv2.bitwise_not(original_img)
@@ -135,7 +135,6 @@ class Processor:
         kernel = np.ones((5, 5), np.uint8)
         closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
-        segmented_img = cv2.cvtColor(segmented_img, cv2.COLOR_RGB2GRAY)
         segmented_img = np.uint8(segmented_img > 0)
         result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=segmented_img)
 
@@ -154,6 +153,9 @@ class Processor:
             result_img (nparray): The image visualizing the results of width measurements.
 
         """
+        
+        if len(edge_detected_img.shape) == 3:
+            edge_detected_img = cv2.cvtColor(edge_detected_img, cv2.COLOR_RGB2GRAY)
 
         result_img = np.array(original_img)
         contours_arr, _ = cv2.findContours(
@@ -191,15 +193,24 @@ class Processor:
     @staticmethod
     def add_mask(segmented_img_array, old_img_array):
         """Add mask for result visualization.
-        
+
         Args:
             segmented_img_array  (nparray): The crack regions.
-            old_img_array (nparray): The original image. 
-            
+            old_img_array (nparray): The original image.
+
         Returns:
             result_array (nparray): The original block with additional added shadows.
         """
 
+        if len(segmented_img_array.shape) == 2:
+            segmented_img_array = cv2.cvtColor(segmented_img_array, cv2.COLOR_GRAY2RGB)
+
+        if len(old_img_array.shape) == 2:
+            old_img_array = cv2.cvtColor(old_img_array, cv2.COLOR_GRAY2RGB)
+
+        segmented_img_array[
+            np.where((segmented_img_array == [255, 255, 255]).all(axis=2))
+        ] = [255, 0, 0]
         segmented_img_Image = Image.fromarray(segmented_img_array)
         mask = np.all(segmented_img_Image == [128, 0, 0], axis=-1)
 

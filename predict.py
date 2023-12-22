@@ -18,7 +18,7 @@ def process_pipeline(index, original_block):
     measured_block = Processor.measure_incircle(
         index, original_block, edge_detected_block
     )
-    result_block = Processor.add_mask(measured_block, np.array(original_block))
+    result_block = Processor.add_mask(edge_detected_block, measured_block)
     return result_block
     # return measured_block
 
