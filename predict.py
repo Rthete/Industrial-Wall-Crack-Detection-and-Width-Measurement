@@ -14,7 +14,9 @@ def process_pipeline(index, original_block):
     segmented_block, positive_flag = Processor.segment_UNet(original_block)
     if not positive_flag:
         return np.array(original_block)
-    edge_detected_block = Processor.edge_detection(original_block, segmented_block)
+    edge_detected_block, positive_flag = Processor.edge_detection(original_block, segmented_block)
+    if not positive_flag:
+        return np.array(original_block)
     measured_block = Processor.measure_incircle(
         index, original_block, edge_detected_block
     )

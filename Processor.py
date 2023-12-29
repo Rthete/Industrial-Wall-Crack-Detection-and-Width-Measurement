@@ -131,14 +131,18 @@ class Processor:
         original_img = cv2.convertScaleAbs(original_img, alpha=0.4, beta=50)
         original_img = cv2.bitwise_not(original_img)
 
-        edges = cv2.Canny(original_img, 50, 100)
+        edges = cv2.Canny(original_img, 35, 70)
         kernel = np.ones((5, 5), np.uint8)
         closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
         segmented_img = np.uint8(segmented_img > 0)
         result_img = cv2.bitwise_and(closed_edges, closed_edges, mask=segmented_img)
 
-        return result_img
+        positive_flag = False
+        if np.any(result_img > 0):
+            positive_flag = True
+
+        return result_img, positive_flag
 
     @staticmethod
     def measure_incircle(index, original_img, edge_detected_img):
