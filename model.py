@@ -10,7 +10,7 @@ from PIL import Image, ImageEnhance, ImageChops
 from torch import nn
 
 from nets.unet import Unet as unet
-from utils import cvtColor, preprocess_input, resize_image, show_config
+from nets.utils import cvtColor, preprocess_input, resize_image, show_config
 
 
 class Model(object):
@@ -20,7 +20,7 @@ class Model(object):
         "backbone"      : "resnet50",
         "input_shape"   : [512, 512],
         "mix_type"      : 0,
-        "cuda"          : True,
+        "cuda"          : False,
     }
 
     def __init__(self, **kwargs):

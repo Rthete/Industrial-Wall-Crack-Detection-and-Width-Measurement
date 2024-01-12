@@ -11,7 +11,7 @@ from PIL import Image
 sys.path.append("..")
 
 from model import Model
-from utils import cvtColor
+from nets.utils import cvtColor
 
 current_time = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -120,6 +120,7 @@ class Processor:
 
         Returns:
             result_img (nparray): The more precise crack regions obtained by combining edge detection.
+            positive_flag (bool): Flag is true when image has crack area.
         """
         
         original_img = np.array(original_img)
@@ -236,6 +237,7 @@ class Processor:
         image = Image.open(img_path)
         img_width, img_height = image.size
         blocks = []
+        locations = []
         logging.info(
             f"Splitting original image...original image size: `({str(img_height)}, {str(img_width)})`"
         )
@@ -243,8 +245,9 @@ class Processor:
             for x in range(0, img_width, block_size):
                 box = (x, y, x + block_size, y + block_size)
                 blocks.append(image.crop(box))
+                locations.append([x, y])
         logging.info(f"Original image is splitted into `{str(len(blocks))}` blocks.")
-        return blocks
+        return blocks, locations
 
     @staticmethod
     def join_image(blocks, img_width, img_height):
